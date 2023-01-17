@@ -2,7 +2,7 @@ package org.example;
 
 /**
  * @author liavb
- * name: Liav
+ * name: Liav Bengayev
  * id: 325364537
  * date: 17/01/2023
  */
