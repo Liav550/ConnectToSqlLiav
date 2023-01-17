@@ -2,6 +2,12 @@ package org.example;
 
 import java.sql.*;
 
+/**
+ * @author liavb
+ * name: Liav Bengayev
+ * id: 325364537
+ * date: 17/01/2023
+ */
 public class MyConnection {
     private Connection connect()
     {
