@@ -6,7 +6,7 @@ import java.sql.*;
  * @author liavb
  * name: Liav Bengayev
  * id: 325364537
- * date: 17/01/2023
+ * date: 18/01/2023
  */
 public class MyConnection {
     private Connection connect()
@@ -15,17 +15,17 @@ public class MyConnection {
         String userName = "postgres";
         String password = "0542615224L";
         try {
-            Connection connection = DriverManager.getConnection(url, userName, password);
-            return connection;
+            Connection con = DriverManager.getConnection(url, userName, password);
+            return con;
         } catch (SQLException e) {
-            System.out.printf("Error!!");
+            System.err.println("Error!!");
             throw new RuntimeException(e);
         }
     }
     public void viewTable() {
         try
         {
-            String sql = "SELECT id, \"userName\", gmail, \"phoneNumber\", \"firstName\", \"lastName\"\n" +
+            String sql = "SELECT id, \"userName\", email, \"phoneNumber\", \"firstName\", \"lastName\"\n" +
                     "\tFROM public.\"Users\";";
             Connection con = connect();
             System.out.println();
@@ -35,7 +35,7 @@ public class MyConnection {
             {
                 System.out.println("ID: "+rs.getString("id"));
                 System.out.println("UserName: "+rs.getString("userName"));
-                System.out.println("Email: "+rs.getString("gmail"));
+                System.out.println("Email: "+rs.getString("email"));
                 System.out.println("Phone Number: "+rs.getString("phoneNumber"));
                 System.out.println("First Name: "+rs.getString("firstName"));
                 System.out.println("Last Name: "+rs.getString("lastName"));
@@ -53,14 +53,21 @@ public class MyConnection {
     {
         try
         {
-            String sql = String.format("INSERT INTO public.\"Users\"(\n" +
-                            "\t\"userName\", gmail, \"phoneNumber\", \"firstName\", \"lastName\")\n" +
-                            "\tVALUES ('%s', '%s', '%s', '%s', '%s');", userName,email,phoneNumber,
-                    firstName,lastName);
+            String sql = "INSERT INTO public.\"Users\"(\n" +
+                            "\t\"userName\", email, \"phoneNumber\", \"firstName\", \"lastName\")\n" +
+                            "\tVALUES (?,?,?,?,?);";
             Connection con = connect();
-            System.out.println();
-            Statement st = con.createStatement();
-            st.execute(sql);
+            PreparedStatement st = con.prepareStatement(sql);
+            con.setAutoCommit(false);
+
+            st.setString(1,userName);
+            st.setString(2,email);
+            st.setString(3,phoneNumber);
+            st.setString(4,firstName);
+            st.setString(5,lastName);
+
+            st.executeUpdate();
+            con.commit();
             System.out.println("Insert Worked");
             st.close();
             con.close();
@@ -75,12 +82,15 @@ public class MyConnection {
         try
         {
             Connection con = connect();
-            System.out.println();
-            Statement st = con.createStatement();
             String sql = String.format("UPDATE public.\"Users\"\n" +
-                    "\tSET \"%s\"= '%s'\n" +
-                    "\tWHERE id=%s;",columnNameToUpdate,newData,Integer.toString(specialID));
-            st.execute(sql);
+                    "\tSET \"%s\"=?\n" +
+                    "\tWHERE id=?;",columnNameToUpdate);
+            con.setAutoCommit(false);
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setString(1,newData);
+            st.setInt(2,specialID);
+            st.executeUpdate();
+            con.commit();
             System.out.println("update saved!");
             st.close();
             con.close();
@@ -96,10 +106,13 @@ public class MyConnection {
         {
             Connection con = connect();
             System.out.println();
-            Statement st = con.createStatement();
-            String sql = String.format("DELETE FROM public.\"Users\"\n" +
-                    "\tWHERE id=%s;",Integer.toString(specialID));
-            st.execute(sql);
+            String sql ="DELETE FROM public.\"Users\"\n" +
+                    "\tWHERE id=?;";
+            con.setAutoCommit(false);
+            PreparedStatement st = con.prepareStatement(sql);
+            st.setInt(1,specialID);
+            st.executeUpdate();
+            con.commit();
             System.out.println("Deleted successfully");
             st.close();
             con.close();
