@@ -1,12 +1,13 @@
 package org.example;
 
 import java.sql.*;
+import java.util.ArrayList;
 
 /**
  * @author liavb
  * name: Liav Bengayev
  * id: 325364537
- * date: 18/01/2023
+ * date: 22/01/2023
  */
 public class MyConnection {
     private Connection connect()
@@ -120,6 +121,80 @@ public class MyConnection {
         catch (SQLException e)
         {
             System.out.println("SQL exception: "+e);
+        }
+    }
+
+    // now we are going to work
+    // with a list of classes
+
+    public ArrayList<User> fillListWithData()
+    {
+        try{
+            Connection con = connect();
+            String sql = "SELECT id, \"userName\", email, \"phoneNumber\", \"firstName\", \"lastName\"\n" +
+                    "\tFROM public.\"Users\";";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            ArrayList<User> list = new ArrayList<User>();
+            while(rs.next()){
+                User use = new User();
+                use.setId(rs.getInt("id"));
+                use.setUserName(rs.getString("userName"));
+                use.setEmail(rs.getString("email"));
+                use.setPhoneNumber(rs.getString("phoneNumber"));
+                use.setFirstName(rs.getString("firstName"));
+                use.setLastName(rs.getString("lastName"));
+                list.add(use);
+            }
+            return list;
+        }
+        catch(SQLException e){
+            System.err.println("SQL exception: "+e);
+            throw new RuntimeException(e);
+        }
+
+    }
+
+    public void updateDBFromList(ArrayList<User> list){
+        try{
+            Connection con = connect();
+            String sql = "UPDATE public.\"Users\"\n" +
+                    "\tSET \"userName\"=?, email=?, \"phoneNumber\"=?, \"firstName\"=?, \"lastName\"=?\n" +
+                    "\tWHERE id=?;";
+            PreparedStatement st = con.prepareStatement(sql);
+            con.setAutoCommit(false);
+            for (User u: list) {
+                st.setString(1,u.getUserName());
+                st.setString(2,u.getEmail());
+                st.setString(3,u.getPhoneNumber());
+                st.setString(4,u.getFirstName());
+                st.setString(5,u.getLastName());
+                st.setInt(6,u.getId());
+                st.executeUpdate();
+            }
+            con.commit();
+            st.close();
+            con.close();
+        }
+        catch(SQLException e){
+            System.err.println("SQL Exception: "+e);
+        }
+    }
+    public void insertToDBFromList(User user, ArrayList<User> list){
+        try{
+            insert(user.getUserName(),user.getEmail(),user.getPhoneNumber(),user.getFirstName(),user.getLastName());
+            Connection con = connect();
+            String sql = "SELECT MAX(id)\n" +
+                    "\tFROM public.\"Users\" ";
+            Statement st = con.createStatement();
+            ResultSet rs = st.executeQuery(sql);
+            user.setId(rs.getInt("max"));
+            list.add(user);
+            st.close();
+            con.close();
+        }
+        catch(SQLException e){
+            System.out.println("SQL Exception: "+e);
         }
     }
 }
