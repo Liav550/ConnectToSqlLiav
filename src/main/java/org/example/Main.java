@@ -12,8 +12,6 @@ public class Main {
     public static void main(String[] args) {
         MyConnection c = new MyConnection();
         ArrayList<User> a = c.fillListWithData();
-        User user = new User("NaveYadi",
-                "Navua@gmail.com","0589471692","Nave","Temani");
 
     }
 }
